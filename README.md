@@ -32,12 +32,9 @@ RepoScout is a local tool for analyzing GitHub repositories using AI models. It 
    ```bash
    pip install -r requirements.txt
    ```
+4. Create a GitHub token in here: https://github.com/settings/tokens
 
-4. Create a `.env` file in the project root with your GitHub token:
-
-   ```env
-   GITHUB_TOKEN=your_github_token_here
-   ```
+5. Chnage `env.exanple` to `.env` and place the GitHub token.
 
 ## How to Run
 
