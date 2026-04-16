@@ -21,7 +21,7 @@ def main():
     load_dotenv()
     parser = argparse.ArgumentParser(description="RepoScout: Summarize a GitHub repository.")
     parser.add_argument("repo_url", type=str, help="GitHub repository URL")
-    parser.add_argument("--model", type=str, default="qwen2.5-coder:3b", help="Ollama model to use (default: qwen2.5-coder:3b)")
+    parser.add_argument("--model", type=str, default="qwen2.5-coder:7b", help="Ollama model to use (default: qwen2.5-coder:7b)")
     parser.add_argument("--core-files", type=int, default=5, help="Number of core source files to fetch (default: 5)")
     args = parser.parse_args()
     console = Console()
