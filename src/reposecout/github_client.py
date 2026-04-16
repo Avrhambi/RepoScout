@@ -2,6 +2,7 @@ import os
 import requests
 from urllib.parse import urlparse
 import re
+import concurrent.futures 
 
 class GitHubScout:
     MEANINGFUL_EXTS = (
@@ -19,6 +20,21 @@ class GitHubScout:
         self.image_exts = ('.png', '.jpg', '.jpeg', '.gif', '.bmp', '.svg', '.webp', '.ico')
         self.lock_patterns = re.compile(r"(\\.lock$|package-lock\\.json$|yarn.lock$|poetry.lock$)")
 
+    def search_repo_by_name(self, repo_name: str) -> tuple[str, str, str]:
+        """
+        Uses GitHub's Search API to find the most popular repository matching the name.
+        Returns (html_url, owner, repo_name) or (None, None, None).
+        """
+        url = f"https://api.github.com/search/repositories?q={repo_name}+in:name&sort=stars&order=desc"
+        resp = requests.get(url, headers=self.headers)
+        if resp.status_code == 200:
+            data = resp.json()
+            items = data.get("items", [])
+            if items:
+                # Return the most starred repository that matches the search
+                top_repo = items[0]
+                return top_repo["html_url"], top_repo["owner"]["login"], top_repo["name"]
+        return None, None, None
 
     def summarize_tree(self, tree):
         """
@@ -98,17 +114,31 @@ class GitHubScout:
         return [path for _, path in candidates[:max_files]]
 
     def fetch_core_source_files(self, owner: str, repo: str, tree: list,
-                                max_files: int = 5, max_chars_per_file: int = 3000) -> dict[str, str]:
+                                max_files: int = 10, max_chars_per_file: int = 3000) -> dict[str, str]:
         """
-        Fetch the content of the most important source files.
-        Returns {path: content} trimmed to max_chars_per_file each.
+        Fetch the content of the most important source files CONCURRENTLY.
         """
         paths = self.pick_core_files(tree, max_files=max_files)
         result = {}
-        for path in paths:
+
+        # Helper function for the thread pool
+        def fetch_single_file(path):
             content = self.fetch_file_content(owner, repo, path)
             if content:
-                result[path] = content[:max_chars_per_file]
+                return path, content[:max_chars_per_file]
+            return path, None
+
+        # Execute all 10 downloads at the exact same time
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+            future_to_path = {executor.submit(fetch_single_file, path): path for path in paths}
+            for future in concurrent.futures.as_completed(future_to_path):
+                try:
+                    path, content = future.result()
+                    if content:
+                        result[path] = content
+                except Exception as e:
+                    pass # Silently skip files that fail to download
+
         return result
 
     def get_github_repo_info(self, repo_url):
@@ -120,15 +150,21 @@ class GitHubScout:
             return None, None
         return path_parts[0], path_parts[1]
 
-    def fetch_github_file_tree(self, owner, repo, branch="main"):
+    def get_repo_metadata(self, repo_url):
+        """Fetches just the repository metadata to check stars and creation year."""
+        owner, repo = self.get_github_repo_info(repo_url)
+        if not owner or not repo:
+            raise ValueError(f"Invalid GitHub repository URL '{repo_url}'.")
         repo_resp = requests.get(f"https://api.github.com/repos/{owner}/{repo}", headers=self.headers)
         repo_resp.raise_for_status()
-        repo_data = repo_resp.json()
-        branch = repo_data.get("default_branch", branch)
+        return owner, repo, repo_resp.json()
+
+    def fetch_github_file_tree(self, owner, repo, repo_info):
+        """Fetches the tree using the already retrieved repo_info."""
+        branch = repo_info.get("default_branch", "main")
         branch_resp = requests.get(f"https://api.github.com/repos/{owner}/{repo}/git/trees/{branch}?recursive=1", headers=self.headers)
         branch_resp.raise_for_status()
-        tree = branch_resp.json()["tree"]
-        return tree
+        return branch_resp.json()["tree"] 
 
     def filter_tree(self, tree):
         filtered = []
@@ -164,11 +200,9 @@ class GitHubScout:
                     found[k] = self.fetch_file_content(owner, repo, path)
         return found
 
-    def fetch_repo_data(self, repo_url):
-        owner, repo = self.get_github_repo_info(repo_url)
-        if not owner or not repo:
-            raise ValueError(f"Invalid GitHub repository URL '{repo_url}'. Please provide a valid URL like 'https://github.com/owner/repo'.")
-        tree = self.fetch_github_file_tree(owner, repo)
+    def fetch_repo_data(self, owner, repo, repo_info):
+        """Performs the deep fetch of the tree and core source files."""
+        tree = self.fetch_github_file_tree(owner, repo, repo_info)
         filtered_tree = self.filter_tree(tree)
         summarized_tree = self.summarize_tree(filtered_tree)
         key_files_content = self.extract_key_files(owner, repo, filtered_tree)
@@ -176,9 +210,11 @@ class GitHubScout:
         return {
             "owner": owner,
             "repo": repo,
+            "repo_info": repo_info,
             "tree": tree,
             "filtered_tree": filtered_tree,
             "summarized_tree": summarized_tree,
             "key_files_content": key_files_content,
             "core_source_files": core_source_files,
         }
+
