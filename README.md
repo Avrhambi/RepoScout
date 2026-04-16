@@ -7,7 +7,7 @@ RepoScout is a local tool for analyzing GitHub repositories using AI models. It 
 1. Clone the project:
 
    ```bash
-   git clone [<this-repo-url>](https://github.com/Avrhambi/RepoScout)
+   git clone https://github.com/Avrhambi/RepoScout
    cd RepoScout
    ```
 
