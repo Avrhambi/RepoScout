@@ -99,7 +99,7 @@ def main():
     from rich.text import Text
     from rich.console import Group
 
-    # 1. Header and Basic Metadata
+    # Header and Basic Metadata
     console.rule(f"[bold green]PROJECT PRESENTATION: {summary.project_name}")
     
     metadata = Text.assemble(
@@ -108,7 +108,7 @@ def main():
     )
     console.print(metadata)
 
-    # 2. Detailed Project Description (Informative Section)
+    # Detailed Project Description (Informative Section)
     console.print(Panel(
         summary.project_description,
         title="[bold blue]Technical Overview",
@@ -116,7 +116,7 @@ def main():
         padding=(1, 2)
     ))
 
-    # 3. Use Cases (Structured Scenarios)
+    # Use Cases (Structured Scenarios)
     console.print("\n[bold yellow]Target Use Cases & Scenarios:[/bold yellow]")
     
     for uc in summary.use_cases:
@@ -125,7 +125,7 @@ def main():
             Text(f"{uc.description}", style="white")
         )
         console.print(Panel(use_case_group, border_style="dim"))
-        console.print("") # Spacer
+        console.print("")
 
 
 if __name__ == "__main__":
