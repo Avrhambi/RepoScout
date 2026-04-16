@@ -27,14 +27,25 @@ RepoScout is a local tool for analyzing GitHub repositories using AI models. It 
    source venv/bin/activate
    ```
 
+
 3. Install dependencies:
 
    ```bash
    pip install -r requirements.txt
    ```
-4. Create a GitHub token in here: https://github.com/settings/tokens
 
-5. Chnage `env.exanple` to `.env` and place the GitHub token.
+4. Download and set up the model:
+
+   - Make sure you have [Ollama](https://ollama.com/) installed and running locally.
+   - Download the recommended model by running:
+
+     ```bash
+     ollama pull qwen2.5-coder:7b
+     ```
+
+5. Create a GitHub token in here: https://github.com/settings/tokens
+
+6. Copy `.env.example` to `.env` and fill in your GitHub token. You can also set a different model name in `.env` if desired.
 
 ## How to Run
 

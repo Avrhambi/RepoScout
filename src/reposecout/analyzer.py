@@ -1,8 +1,12 @@
+
+import os
 from ollama import chat
 from reposecout.models import RepoSummary
 
 class LocalAnalyzer:
-    def __init__(self, model: str = "qwen2.5-coder:7b"):
+    def __init__(self, model: str = None):
+        if model is None:
+            model = os.getenv("MODEL_NAME")
         self.model = model
 
     def analyze(self, prompt: str) -> RepoSummary:

@@ -6,6 +6,7 @@ from reposecout.github_client import GitHubScout
 from reposecout.analyzer import LocalAnalyzer
 from reposecout.models import RepoSummary
 
+MODEL_NAME = os.getenv("MODEL_NAME")
 def build_source_section(core_source_files: dict) -> str:
     """Format fetched source files into a prompt section."""
     if not core_source_files:
@@ -21,8 +22,8 @@ def main():
     load_dotenv()
     parser = argparse.ArgumentParser(description="RepoScout: Summarize a GitHub repository.")
     parser.add_argument("repo_url", type=str, help="GitHub repository URL")
-    parser.add_argument("--model", type=str, default="qwen2.5-coder:7b", help="Ollama model to use (default: qwen2.5-coder:7b)")
-    parser.add_argument("--core-files", type=int, default=5, help="Number of core source files to fetch (default: 5)")
+    parser.add_argument("--model", type=str, default=MODEL_NAME, help="Ollama model to use (default: qwen2.5-coder:7b)")
+    parser.add_argument("--core-files", type=int, default=10, help="Number of core source files to fetch (default: 10)")
     args = parser.parse_args()
     console = Console()
 
