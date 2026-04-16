@@ -44,8 +44,9 @@ RepoScout is a local tool for analyzing GitHub repositories using AI models. It 
      ```
 
 5. Create a GitHub token in here: https://github.com/settings/tokens
+   - personal Access Token -> Tokens (classic) -> Generate new token -> Generate new token (classic) fill note description and choose scpoe:repo
 
-6. Copy `.env.example` to `.env` and fill in your GitHub token. You can also set a different model name in `.env` if desired.
+7. Copy `.env.example` to `.env` and fill in your GitHub token. You can also set a different model name in `.env` if desired.
 
 ## How to Run
 
