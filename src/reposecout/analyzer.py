@@ -6,7 +6,7 @@ class LocalAnalyzer:
         self.model = model
 
     def analyze(self, prompt: str) -> RepoSummary:
-        # The System Message is the "anchor" for 7b models
+        # for 7b models System hep reduce יallucinations 
         system_content = (
             "You are a Technical Product Architect. Your goal is to pitch this repository to other developers. "
             "Be descriptive and highly technical. Avoid vague marketing fluff. "
