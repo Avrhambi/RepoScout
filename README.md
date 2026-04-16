@@ -8,6 +8,8 @@ RepoScout is a local tool for analyzing GitHub repositories using AI models. It 
 
    ```bash
    git clone https://github.com/Avrhambi/RepoScout
+   ```
+   ```bash
    cd RepoScout
    ```
 
@@ -15,8 +17,12 @@ RepoScout is a local tool for analyzing GitHub repositories using AI models. It 
 
    ```bash
    python -m venv venv
+   ```
+   ```bash
    # On Windows:
    venv\Scripts\activate
+   ```
+   ```bash
    # On macOS/Linux:
    source venv/bin/activate
    ```
