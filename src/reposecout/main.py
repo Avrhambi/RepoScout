@@ -129,7 +129,7 @@ def main():
             prompt = (
                 f"Please provide an architectural deep-dive for: {repo_data['repo']}.\n\n"
                 "REQUIREMENTS:\n"
-                "1. ARCHITECTURE OVERVIEW: Provide a deep-dive, structured overview of the system's design.\n"
+                "1. ARCHITECTURE OVERVIEW: Provide a deep-dive, structured overview of the system's design in exactly 3 sentences. Focus on project logic.\n"
                 "2. CORE COMPONENTS: Identify 3-4 of the most critical SOURCE CODE FILES (e.g., 'main.py' or 'routing.py'). YOU MUST OUTPUT FILE NAMES, DO NOT list abstract concepts or external servers like Uvicorn.\n"
                 "3. ACCESSIBILITY: Write clearly so developers of all skill levels can learn from it.\n"
             )
@@ -312,7 +312,7 @@ def main():
             desc = uc.get("description", "") if isinstance(uc, dict) else getattr(uc, "description", "")
             
             console.print(f"[bold green]Scenario:[/bold green] {scenario}")
-            typewriter_panel(console, desc, "Why it excels", border_style="dim", delay=0.03)
+            typewriter_panel(console, border_style="dim", delay=0.03)
             console.print("")
             time.sleep(1.0)
 

@@ -6,15 +6,15 @@ class CoreComponent(BaseModel):
         description="The exact file path or module name. MUST BE A FILE OR DIRECTORY. Do not list frameworks, dependencies, or concepts."
     )
     responsibility: str = Field(
-        description="Explain what this specific file or directory does in the system."
+        description="Explain what this specific file or directory does in the system in exactly one sentence."
     )
 
 class UseCase(BaseModel):
     scenario: str = Field(
-        description="A specific, real-world engineering problem where this framework would be the perfect choice."
+        description="A real-world engineering problem that this repository solves. DO NOT use generic examples, invent a real scenario based on the code."
     )
     description: str = Field(
-        description="Explain WHY this project excels here. Focus on the architectural advantages, performance, or built-in features that make it superior. DO NOT write a step-by-step tutorial on how to implement it."
+        description="Explain exactly how the code solves this specific scenario. Do not write placeholder text. Focus on the architectural advantages, performance, or built-in features that make it superior. DO NOT write a step-by-step tutorial on how to implement it."
     )
 
 
@@ -25,7 +25,7 @@ class RepoSummary(BaseModel):
         description="List ONLY specific frameworks and libraries (e.g., React, FastAPI, NumPy). Do not list the project name itself, and do not list abstract concepts like 'Type Hinting' or 'Asynchronous'."
     )
     architecture_overview: str = Field(
-        description="Explain the core data flow and system structure. Do not mention the tools used to generate this summary (e.g., do not mention LLMs, Ollama, or OpenAI)."
+        description="Explain the core data flow and system structure in 3 sentences. Do not mention the tools used to generate this summary (e.g., do not mention LLMs, Ollama, or OpenAI)."
     )
     core_components: List[CoreComponent] = Field(
         description="Break down the top 2 to 3 most critical internal source code files."
