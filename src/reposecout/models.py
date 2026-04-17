@@ -31,7 +31,7 @@ class RepoSummary(BaseModel):
         description="Break down the top 2 to 3 most critical internal source code files."
     )
     use_cases: List[UseCase] = Field(
-        description="Provide exactly 2 highly specific, practical scenarios where this project excels."
+        description="Provide exactly 2 highly specific, practical scenarios where this project excels, foucos on logic."
     )
     key_takeaway: str = Field(
         description="One concluding paragraph summarizing the project's main value."

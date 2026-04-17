@@ -312,7 +312,7 @@ def main():
             desc = uc.get("description", "") if isinstance(uc, dict) else getattr(uc, "description", "")
             
             console.print(f"[bold green]Scenario:[/bold green] {scenario}")
-            typewriter_panel(console, border_style="dim", delay=0.03)
+            typewriter_panel(console, desc,"Scenario Explanation",border_style="dim", delay=0.03)
             console.print("")
             time.sleep(1.0)
 
