@@ -40,7 +40,7 @@ RepoScout is a local tool for analyzing GitHub repositories using AI models. It 
    - Download the recommended model by running:
 
      ```bash
-     ollama pull qwen2.5-coder:7b
+     ollama pull qwen2.5-coder:3b
      ```
 
 5. Create a GitHub token in here: https://github.com/settings/tokens
@@ -62,4 +62,3 @@ Replace `<URL>` with the GitHub repository you want to analyze (e.g., `https://g
 ## Note
 
 - RepoScout requires [Ollama](https://ollama.com/) to be running locally.
-- For bettter results, use at least a 7B parameters model with Ollama.

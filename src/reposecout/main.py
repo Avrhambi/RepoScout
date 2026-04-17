@@ -26,7 +26,6 @@ def build_source_section(core_source_files: dict) -> str:
 def get_downloads(repo_input_string: str, language: str) -> str:
     """Dynamically fetch package downloads based on the primary language."""
     import requests
-    # Fix: Extract only the package name (e.g., 'fastapi' from 'tiangolo/fastapi')
     package_name = repo_input_string.split('/')[-1].lower()
     try:
         lang = language.lower()
@@ -49,7 +48,6 @@ def get_downloads(repo_input_string: str, language: str) -> str:
 def typewriter_panel(console, text, title, border_style="blue", delay=0.02):
     """Simulates a fast typewriter effect updating inside a Rich Panel."""
     current_text = ""
-    # refresh_per_second ensures the terminal updates smoothly as chars are added
     with Live(Panel(current_text, title=f"[bold {border_style}]{title}", border_style=border_style, padding=(1, 2)), console=console, refresh_per_second=60, transient=False) as live:
         for char in text:
             current_text += char
@@ -77,13 +75,11 @@ def main():
 
     # --- 1. RESOLVE REPOSITORY NAME TO URL ---
     if "/" not in repo_input:
-        # console.print(f"🔍 Searching for popular repository matching '[bold]{repo_input}[/bold]'...")
         search_url, owner, repo_name = github_client.search_repo_by_name(repo_input)
         if not search_url:
             console.print(f"[yellow]Could not quickly find a definitive repository for '{repo_input}'. Please run the tool again with the full GitHub URL.[/yellow]")
             sys.exit(1)
         repo_url = search_url
-        # console.print(f"[green]Found repository: {owner}/{repo_name} ({repo_url})[/green]\n")
     else:
         if not repo_input.startswith("http"):
             if "github.com" not in repo_input:
@@ -99,7 +95,6 @@ def main():
     with Progress(
         SpinnerColumn("dots"), # Use standard dots, no emojis
         TextColumn("[progress.description]{task.description}"), 
-        BarColumn(),           # This creates the loading bar
         transient=True, 
         console=console
     ) as progress:
@@ -121,10 +116,9 @@ def main():
 
         is_fast_path = stars > 15000 and creation_year < 2024
         
-        # --- 2 & 3. DATA FETCHING & PROMPT CONSTRUCTION ---
+        
         if is_fast_path:
             progress.stop()
-            # console.print(f"\n[bold yellow]⚡ FAST PATH TRIGGERED:[/bold yellow] [green]{owner}/{repo_name}[/green] is a highly popular framework ({stars:,} stars, {creation_year}). Bypassing deep source download to use the LLM's instant parametric memory!\n")
             repo_data = {"repo": f"{owner}/{repo_name}", "repo_info": repo_info}
             progress.start()
             
@@ -136,12 +130,12 @@ def main():
                 f"Please provide an architectural deep-dive for: {repo_data['repo']}.\n\n"
                 "REQUIREMENTS:\n"
                 "1. ARCHITECTURE OVERVIEW: Provide a deep-dive, structured overview of the system's design.\n"
-                "2. CORE COMPONENTS: Identify 3-5 of the most critical SOURCE CODE FILES or internal directories. DO NOT list abstract concepts or external dependencies.\n"
+                "2. CORE COMPONENTS: Identify 3-4 of the most critical SOURCE CODE FILES (e.g., 'main.py' or 'routing.py'). YOU MUST OUTPUT FILE NAMES, DO NOT list abstract concepts or external servers like Uvicorn.\n"
                 "3. ACCESSIBILITY: Write clearly so developers of all skill levels can learn from it.\n"
             )
 
         else:
-            fetch_task = progress.add_task("Downloading core source files (Deep Analysis)…", start=True, total=None)
+            fetch_task = progress.add_task("Scanning core source files…", start=True, total=None)
             try:
                 repo_data = github_client.fetch_repo_data(owner, repo_name, repo_info)
             except Exception as e:
@@ -149,7 +143,7 @@ def main():
                 console.print(f"[red]Error downloading source code: {e}[/red]")
                 sys.exit(1)
             
-            progress.update(fetch_task, total=1, completed=1)
+            progress.update(fetch_task, completed=1)
 
             system_prompt = (
                 "You are an expert Software Architect. Analyze the provided repository and explain its architecture. "
@@ -160,7 +154,7 @@ def main():
                 f"Please analyze the repository: {repo_data['repo']}\n\n"
                 "REQUIREMENTS:\n"
                 "1. ARCHITECTURE OVERVIEW: Provide a structured overview of the system's design.\n"
-                "2. CORE COMPONENTS: Identify the most important SPECIFIC FILES from the source provided. Detail their exact responsibilities.\n"
+                "2. CORE COMPONENTS: Identify 2-3 of the most important SPECIFIC FILES from the source provided (e.g., 'main.py' or 'routing.py'). Detail their exact responsibilities.\n"
                 "3. STRICT EVIDENCE: Base your analysis *only* on the provided directory structure and source files.\n\n"
                 "=== DIRECTORY STRUCTURE ===\n"
                 f"{chr(10).join(repo_data.get('summarized_tree', []))}\n\n"
@@ -168,10 +162,10 @@ def main():
                 f"{core_source_section}"
             )
             
-            progress.update(fetch_task, total=1, completed=1)
+            progress.update(fetch_task, completed=1)
 
         # --- 3. BACKGROUND LLM WORKER ---
-        analyze_task = progress.add_task("Analysing architecture with local LLM...", start=True, total=None)
+        analyze_task = progress.add_task("Analysing architecture...", start=True, total=None)
 
         shared_state = {
             "raw": "",
@@ -196,14 +190,13 @@ def main():
         llm_thread = threading.Thread(target=llm_worker)
         llm_thread.start()
 
-        # Pulse the progress bar for EXACTLY 5 seconds (or less if the model is super fast)
         start_time = time.time()
-        while time.time() - start_time < 5.0:
+        while time.time() - start_time < 10.0:
             if shared_state["done"]:
                 break
             time.sleep(0.1)
 
-        progress.update(analyze_task, completed=1, total=1)
+        progress.update(analyze_task, completed=1)
         
         if shared_state["error"]:
             if "model not found" in str(shared_state["error"]).lower():
@@ -236,7 +229,7 @@ def main():
     clean_repo = repo_name.lower()
     
     tech_stack_raw = get_field_when_ready("tech_stack", "architecture_overview")
-    bad_tech = ["asynchronous", "type hinting", "github api", "ollama ai"]
+    bad_tech = ["asynchronous", "type hinting", "github api", "ollama ai", "wsgi", "asgi"]
     tech_stack = []
     
     if tech_stack_raw:
@@ -259,29 +252,29 @@ def main():
     
     time.sleep(0.5)
     console.print(Text.assemble(("Language: ", "bold"), (f"{primary_lang}", "green")))
-    time.sleep(0.5)
+    time.sleep(0.8)
     console.print(Text.assemble(("Stars: ", "bold"), (f"★ {stars_str}", "yellow")))
-    time.sleep(0.5)
+    time.sleep(0.8)
     console.print(Text.assemble(("Year: ", "bold"), (f"{year}", "cyan")))
-    time.sleep(0.5)
+    time.sleep(0.8)
     console.print(Text.assemble(("Downloads: ", "bold"), (f"{downloads}", "magenta")))
-    time.sleep(0.5)
+    time.sleep(0.8)
     console.print(Text.assemble(("Tech Stack: ", "bold"), (f"{', '.join(tech_stack)}\n", "cyan")))
-    time.sleep(1.0)
+    time.sleep(0.5)
 
     # Reveal 2: Architecture Overview (Typewriter Effect)
     arch_overview_raw = get_field_when_ready("architecture_overview", "core_components")
     if arch_overview_raw:
         arch_overview = arch_overview_raw.replace("OpenAI's Ollama", "a local LLM").replace("OpenAI's LLaMA", "a local LLM")
-        typewriter_panel(console, arch_overview, "Architecture Overview", border_style="blue", delay=0.01)
-    time.sleep(1.5)
+        typewriter_panel(console, arch_overview, "Architecture Overview", border_style="blue", delay=0.04)
+    time.sleep(0.5)
 
     # Reveal 3: Core Components Breakdown (Line-by-Line Stagger)
     core_components_raw = get_field_when_ready("core_components", "use_cases")
     console.print("\n[bold magenta]Core Components Breakdown:[/bold magenta]")
     time.sleep(0.5)
 
-    invalid_keywords = ["dependency injection", "asynchronous", "architecture", "framework", "programming", "concept", "starlette", "pydantic", "sqlalchemy"]
+    invalid_keywords = ["dependency injection", "asynchronous", "architecture", "framework", "programming", "concept", "starlette", "pydantic", "sqlalchemy", "uvicorn", "wsgi", "asgi", "server", "interface"]
     valid_components = []
     
     if core_components_raw:
@@ -304,9 +297,9 @@ def main():
         # Type out the responsibility description for each component
         for char in comp['responsibility']:
             console.print(char, end="")
-            time.sleep(0.03)
+            time.sleep(0.05)
         console.print() # Newline after it finishes typing
-        time.sleep(0.8)
+        time.sleep(0.5)
 
     # Reveal 4: Practical Use Cases (Typewriter Effect inside Panels)
     use_cases_raw = get_field_when_ready("use_cases", "key_takeaway")
@@ -319,7 +312,7 @@ def main():
             desc = uc.get("description", "") if isinstance(uc, dict) else getattr(uc, "description", "")
             
             console.print(f"[bold green]Scenario:[/bold green] {scenario}")
-            typewriter_panel(console, desc, "Implementation", border_style="dim", delay=0.008)
+            typewriter_panel(console, desc, "Why it excels", border_style="dim", delay=0.03)
             console.print("")
             time.sleep(1.0)
 

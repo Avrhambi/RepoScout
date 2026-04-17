@@ -11,10 +11,10 @@ class CoreComponent(BaseModel):
 
 class UseCase(BaseModel):
     scenario: str = Field(
-        description="A specific, practical scenario where this tool is highly valuable."
+        description="A specific, real-world engineering problem where this framework would be the perfect choice."
     )
     description: str = Field(
-        description="Detailed explanation of how the project's architecture solves problems in this scenario."
+        description="Explain WHY this project excels here. Focus on the architectural advantages, performance, or built-in features that make it superior. DO NOT write a step-by-step tutorial on how to implement it."
     )
 
 
