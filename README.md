@@ -1,4 +1,4 @@
-# RepoScout: Local AI Repository Analyzer
+# RepoScout
 
 RepoScout is a local tool for analyzing GitHub repositories using AI models. It leverages Ollama and a local LLM to provide insights into any codebase.
 
